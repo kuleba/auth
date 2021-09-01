@@ -1,0 +1,13 @@
+{
+  "name": "Secrets - Starting Code",
+  "version": "1.0.0",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.2",
+    "mongoose-encryption": "^2.1.0"
+  },
+  "devDependencies": {
+    "ejs": "^3.1.6"
+  }
+}
