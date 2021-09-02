@@ -1,6 +1,6 @@
 const express = require ('express');
 const router = express.Router();
-const md5 = require ('md5');
+const bcrypt = require ('bcrypt');
 const User = require ('./../models/user');
 
 router.route('/')
@@ -9,18 +9,19 @@ router.route('/')
     })
     .post((req, res)=>{
        const username = req.body.username;
-       const password = md5(req.body.password);
+       const password = req.body.password;
 
        User.findOne({email: username}, (err, foundUser)=>{
            if (err){
                console.log(err)
            }else {
                if (foundUser) {
-                   if (foundUser.password === password){
-                       res.render('secrets')
-                   }else {
-                       console.log('Wrong pass')
-                   }
+                   bcrypt.compare(password, foundUser.password, function (error, result) {
+                       if(result === true){
+                           res.render('secrets')
+                       }
+
+                   })
                }
            }
        })
