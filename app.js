@@ -3,12 +3,20 @@ require('dotenv').config();
 const express = require ('express');
 const ejs = require ('ejs');
 const path = require ('path');
+const User = require ('./models/user');
 const mongoose = require ('mongoose');
-const encrypt = require ('mongoose-encryption');
+const session = require ('express-session');
+const passport = require ('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+var findOrCreate = require('mongoose-findorcreate');
+
+
 
 const homeRouter = require('./routes/home');
 const loginRouter = require('./routes/login');
 const registerRouter = require('./routes/register');
+const secretsRouter = require ('./routes/secrets');
+const logoutRouter = require ('./routes/logout');
 
 const app = express();
 
@@ -20,10 +28,34 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false
+    }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new GoogleStrategy({
+        clientID: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENY_SECRET,
+        callbackURL: "http://localhost:3000/auth/google/secrets"
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        User.findOrCreate({ googleId: profile.id }, function (err, user) {
+            return cb(err, user);
+        });
+    }
+));
+
+
 
 app.use('/', homeRouter);
 app.use('/login', loginRouter);
 app.use('/register', registerRouter);
+app.use('/secrets', secretsRouter);
+app.use('/logout', logoutRouter);
 
 
 

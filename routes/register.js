@@ -1,8 +1,9 @@
 const express = require ('express');
 const router = express.Router();
-const bcrypt = require ('bcrypt');
 const User = require ('./../models/user');
-const saltRounds = 10;
+const passport = require ('passport');
+const passportLocalMongoose = require ('passport-local-mongoose');
+
 
 
 router.route('/')
@@ -10,25 +11,23 @@ router.route('/')
     res.render('register')
 })
     .post((req, res)=>{
-
-        bcrypt.hash(req.body.password, saltRounds, function (err, hash){
-
-            const newUser = new User ({
-                email: req.body.username,
-                password: hash
-            });
-            newUser.save(err=>{
-                if(!err){
-                    console.log('User register success');
-                    res.render('secrets');
-                }else{
-                    console.log(err)
-                }
+    User.register({username: req.body.username}, req.body.password, function (err, user) {
+        if (err){
+            console.log(err);
+            res.redirect('/')
+        }else {
+            passport.authenticate('local')(req, res,function () {
+                res.redirect('/secrets')
             })
-        })
-
+        }
 
     })
+
+
+
+    });
+
+
 
 
 

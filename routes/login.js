@@ -1,6 +1,6 @@
 const express = require ('express');
 const router = express.Router();
-const bcrypt = require ('bcrypt');
+const passport = require ('passport');
 const User = require ('./../models/user');
 
 router.route('/')
@@ -8,25 +8,23 @@ router.route('/')
         res.render('login')
     })
     .post((req, res)=>{
-       const username = req.body.username;
-       const password = req.body.password;
+        const user = new User ({
+            username: req.body.username,
+            password: req.body.password
+        });
+        req.login(user, function (err) {
+            if (err){
+                console.log(err)
+            }else {
+                passport.authenticate('local')(req, res,function () {
+                    res.redirect('/secrets')
+                })
+            }
+        })
 
-       User.findOne({email: username}, (err, foundUser)=>{
-           if (err){
-               console.log(err)
-           }else {
-               if (foundUser) {
-                   bcrypt.compare(password, foundUser.password, function (error, result) {
-                       if(result === true){
-                           res.render('secrets')
-                       }
+    });
 
-                   })
-               }
-           }
-       })
 
-    })
 
 
 
